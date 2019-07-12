@@ -12,15 +12,10 @@ module.exports = {
     let reqPlanets = {};
     let fullList = await getFullList('https://swapi.co/api/planets');
     let promiseArr = [];
-    fullList.forEach((p, fullListIndex) => {
-      if (p.residents.length) {
-        p.residents.forEach((url, i) => {
-          if (!reqPlanets[url]) reqPlanets[url] = [fullListIndex];
-          else reqPlanets[url].push(fullListIndex);
-        });
-        p.residents = [];
-      }
-    });
+    fullList.forEach((p, fullListIndex) =>
+      mapResidentUrls(p, fullListIndex, reqPlanets)
+    );
+
     Object.keys(reqPlanets).forEach((k, i) => {
       promiseArr.push(axios.get(k));
     });
@@ -54,4 +49,14 @@ function sortByQueryParam(a, b, sortBy) {
   if (aVal < bVal) return -1;
   if (aVal > bVal || aVal === 'unknown' || bVal === 'unknown') return 1;
   return 0;
+}
+
+function mapResidentUrls(p, fullListIndex, reqPlanets) {
+  if (p.residents.length) {
+    p.residents.forEach((url, i) => {
+      if (!reqPlanets[url]) reqPlanets[url] = [fullListIndex];
+      else reqPlanets[url].push(fullListIndex);
+    });
+    p.residents = [];
+  }
 }
